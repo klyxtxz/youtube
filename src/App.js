@@ -2,18 +2,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 import axios from "axios";
+import { invoke } from '@tauri-apps/api'
 
-async function fetchCaptions(videoId) {
-  const captionsResponse = await axios.get("http://localhost:8888/api", {
-    params: {
-      videoid: videoId,
-    }
-  });
-  return captionsResponse.data;
-}
 
 function App() {
   // handle what happens on key press
+
+  invoke('greet', { name: 'World1111111111111111111111111111111111111' })
+  // `invoke` returns a Promise
+  .then((response) => {headings.current[0].text=response});
 
   const iframeWindow = useRef(null);
   const playerRef = useRef(null);
@@ -65,8 +62,8 @@ function App() {
     // access to player in all event handlers via event.target
     playerRef.current = event.target;
     event.target.pauseVideo();
-    fetchCaptions(videoId).then(function (value) {
-      headings.current = value
+    invoke('getcaption',{id:videoId}).then(function (value) {
+      headings.current = JSON.parse(value)
     }, function (error) {
       console.log(error)
     });
@@ -158,8 +155,8 @@ function App() {
       var id = event.target.value.split("?v=")[1]
       console.log(id)
       setVideoId(id);
-      fetchCaptions(id).then(function (value) {
-        headings.current = value
+      invoke('getcaption',{id:videoId}).then(function (value) {
+        headings.current = JSON.parse(value)
       }, function (error) {
         console.log(error)
       });
@@ -200,6 +197,5 @@ function App() {
       </div>
     </div>
   )
-}
-
+  }
 export default App;
